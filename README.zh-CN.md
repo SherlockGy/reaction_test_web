@@ -1,6 +1,6 @@
 # 反应速度测试
 
-[![English](httpshttps://img.shields.io/badge/language-English-blue.svg)](README.md)
+[![English](https://img.shields.io/badge/language-English-blue.svg)](README.md)
 
 一个用于测量您反应速度的简单网页应用。
 
