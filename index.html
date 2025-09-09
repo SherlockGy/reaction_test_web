@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反应速度测试</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #game-area {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.05s ease-in-out;
+            color: white;
+            user-select: none; /* 禁止选中文本 */
+        }
+        #message {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        /* 初始状态 */
+        .state-start {
+            background-color: #333;
+        }
+        /* 等待变绿 */
+        .state-waiting {
+            background-color: #d9534f; /* 红色 */
+        }
+        /* 等待点击 */
+        .state-reaction {
+            background-color: #5cb85c; /* 绿色 */
+        }
+        /* 显示结果 */
+        .state-result {
+            background-color: #428bca; /* 蓝色 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-area">
+        <p id="message"></p>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const message = document.getElementById('message');
+
+        let state = 'start'; // 'start', 'waiting', 'reaction', 'result'
+        let timerId = null;
+        let startTime = 0;
+
+        function handleInteraction() {
+            switch (state) {
+                case 'start':
+                    startWaiting();
+                    break;
+                case 'waiting':
+                    tooEarly();
+                    break;
+                case 'reaction':
+                    showResult();
+                    break;
+                case 'result':
+                    startWaiting();
+                    break;
+            }
+        }
+
+        function reset() {
+            state = 'start';
+            gameArea.className = 'state-start';
+            message.innerHTML = '点击或按空格键开始';
+        }
+
+        function startWaiting() {
+            state = 'waiting';
+            gameArea.className = 'state-waiting';
+            message.innerHTML = '等待变绿...';
+
+            // 设置一个2到5秒的随机延迟
+            const randomDelay = Math.random() * 3000 + 2000;
+            timerId = setTimeout(startReaction, randomDelay);
+        }
+
+        function startReaction() {
+            state = 'reaction';
+            gameArea.className = 'state-reaction';
+            message.innerHTML = ''; // 变绿时清空文字，减少干扰
+            startTime = performance.now(); // 使用高精度计时器
+        }
+
+        function tooEarly() {
+            clearTimeout(timerId); // 清除即将变绿的计时器
+            state = 'result';
+            gameArea.className = 'state-result';
+            message.innerHTML = '太早了！<br><small style="font-size: 0.5em;">点击或按空格开始下一轮</small>';
+        }
+
+        function showResult() {
+            const endTime = performance.now();
+            const reactionTime = endTime - startTime;
+            state = 'result';
+            gameArea.className = 'state-result';
+            message.innerHTML = `反应时间：${reactionTime.toFixed(1)} ms<br><small style="font-size: 0.5em;">点击或按空格开始下一轮</small>`;
+        }
+
+        // 添加事件监听器
+        gameArea.addEventListener('click', handleInteraction);
+        gameArea.addEventListener('touchstart', handleInteraction); // 兼容移动设备
+
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                event.preventDefault(); // 防止空格键滚动页面
+                handleInteraction();
+            }
+        });
+
+        // 初始化
+        reset();
+    </script>
+
+</body>
+</html>
